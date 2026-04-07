@@ -115,6 +115,41 @@ static uint32_t randomGen(uint32_t max){
 static void startLedFlash(uint32_t durationMS){
     game.ledFlashEnd = HAL_GetTick()+durationMS;
     PWM_SetDuty(&pwm_cfg,80)
+    }
+
+static void updateLedFlash(void){
+    if(game.ledFlashEnd && HAL_GetTick() >= game.ledFlashEnd){
+    PWM_SetDuty(&pwm_cfg,0);
+    game.ledFlashEnd=0;
+    }
+
+}
+
+static void playHitSound(uint8_t combo){
+    uint16_t frequency = 1000 + (combo*100);
+    if (freq>3000){
+        frequency=3000;
+    }    
+    buzzer_tone(&buzzer_cfg,frequency,30);
+    HAL_Delay(30);
+    buzzer_off(&buzzer_cfg);
+    
+}
+
+static void playMissSound(void){
+    buzzer_tone(&buzzer_cfg,300,30);
+    HAL_Delay(50);
+    buzzer_off(&buzzer_cfg);
+}
+
+static void playGameOverSound(void){
+    buzzer_tone(&buzzer_cfg,150,30);
+    HAL_Delay(300);
+    buzzer_off(&buzzer_cfg);
+    buzzer_tone(&buzzer_cfg,100,30);
+    HAL_Delay(500);
+    buzzeer_off(&buzzer_cfg);
+    
 }
 
 // Frame rate for this game (in milliseconds) - fastest game
