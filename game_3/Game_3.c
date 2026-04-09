@@ -448,7 +448,7 @@ static void drawGame(void){
     sprint(buf,"Score: %d", game.score);
     LCD_printString(buf,10,10,1,2);
     sprintf(buf, "Lives: %d", game.lives);
-    LCD_printString(buf, 180, 10, 1, 2)
+    LCD_printString(buf, 180, 10, 1, 2);
     if(game.combo>1){
         sprintf(buf, "x%d COMBO!", game.combo);
         LCD_printString(buf, 80, 50, 2, 2);
@@ -479,3 +479,115 @@ static void drawGame(void){
 
 }
 
+//main code
+
+MenuState Game3_run(void){
+    resetGame();
+
+    buzzer_tone(&buzzer_cfg, 1500, 30);
+    HAL_Delay(50);
+    buzzer_off(&buzzer_cfg);
+
+    uint32_t lastFrameTime = HAL_GetTick();
+    uint32_t buttonPressStart = 0;
+    uint8_t buttonWasPressed = 0;
+
+    while(1){
+        uint32_t now= HAL_GetTick();
+        float deltaSec = (now-lastFrameTime)/1000.0f;
+        if(deltaSec > 0.05f) deltaSec = 0.05f;
+        lastFrameTime = now;
+
+        Input_Read();
+        Joystick_Read(&joystick_cfg, &joystick_data);
+        userInput joyInput = Joystick_GetInput(&joystick_data);
+
+        uint8_t buttonPressed = current_input.btn3_pressed;
+
+        if(buttonPressed && !buttonWasPRessed){
+            buttonPressStart = now;
+            buttonWasPressed = 1;
+            
+        }
+        else if(!buttonPressed && buttonWasPressed){
+            uint32_t duration = now- buttonPressStart;
+            buttonWasPressed = 0;
+            if(duration < longPressMS){
+                if(game.state==statePlaying){
+                    handleShot(game.crosshair);
+                }
+                else if(game.state==statePaused){
+                    game.state=statePlaying;
+                }
+                else if(game.state==stateGameOver){
+                    PWM_SetDuty(&pwm_cfg, 0);
+                    buzzer_off(&buzzer_cfg);
+                    return MENU_STATE_HOME;
+                }
+                
+            }
+            else{
+                if(game.state==statePlaying){
+                    game.state = statePaused;
+                }
+                else if(game.state==statePaused){
+                    PWM_SetDuty(&pwm_cfg, 0);
+                    buzzer_off(&buzzer_cfg);
+                    return MENU_STATE_HOME;
+                }
+            }
+        }
+
+        //updating crosshair
+        game.crosshair.x = (joyInput.coord.x * game.sensitivity) * (screenWidth/2)+(screenWidth/2);
+        game.crosshair.y = (joyInput.coord.y * game.sensitivity) * (screenHeight/2)+(screenHeight/2);
+        if(game.crosshair.x<0){
+            game.crosshair.x=0;
+        }
+        if(game.crosshair.x>screenWidth){
+            game.crosshair.x = screenWidth;
+        }
+        if(game.crosshair.y<0){
+            game.crosshair.y=0;
+        }
+        if(game.crosshair.y>screenHeight){
+            game.crosshair.y = screenHeight;
+        }
+
+        if(game.state==statePaused){
+            if(joyInput.direction == WEST){
+                game.sensitivity -= 0.05f;
+                if(game.sensitivity <0){
+                    game.sensitivity =0;
+                }
+            if(joyInput.direction == EAST){
+                game.sensitivity +=0.05f;
+                if(game.sensitivity>1){
+                    game.sensitivity =1;
+                }
+            }
+                
+            }
+        }
+            if(game.state == statePlaying){
+                updateGame(deltaSec);
+            }
+            updateLedFlash();
+
+            LCD_Fill_Buffer(0);
+            drawGame();
+            LCD_Refresh(&cfg0);
+
+            uint32_t frameTime = HAL_GetTick() - now;
+            if(frameTime<gameFrameMS){
+                HAL_Delay(gameFrameMS-frameTime);
+            }
+            
+                
+        
+        
+        
+        
+            
+    }
+}
