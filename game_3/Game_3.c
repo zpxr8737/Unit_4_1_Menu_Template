@@ -39,7 +39,7 @@ typedef enum{
 stateMenu,
 statePlaying,
 statePaused,
-StateGameOver
+stateGameOver
 } GameState;
 
 typedef struct{
@@ -92,7 +92,7 @@ static const uint8_t appleSprite[16][16]={
     {255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255}
 };
 
-static const uint8_t orangeSprite[16][16]{
+static const uint8_t orangeSprite[16][16]={
     {255,255,255,255,255,4,4,4,4,4,4,255,255,255,255,255},
     {255,255,255,4,4,4,4,4,4,4,4,4,4,255,255,255},
     {255,255,4,4,4,4,4,4,4,4,4,4,4,4,255,255},
@@ -203,7 +203,7 @@ static uint16_t getFruitHitSound(uint8_t type, uint8_t combo){
         case fruitWatermelon: base = 700; break;
         default: base = 1000; break;
     }
-    uint16_t add = (combo>5 ? 5: combo) * 50
+    uint16_t add = (combo>5 ? 5: combo) * 50;
     return base + add;
 }
 
@@ -228,15 +228,12 @@ static void updateLedFlash(void){
 
 }
 
-static void playHitSound(uint8_t combo){
-    uint16_t frequency = 1000 + (combo*100);
-    if (frequency>3000){
-        frequency=3000;
-    }    
-    buzzer_tone(&buzzer_cfg,frequency,30);
+static void playHitSound(uint8_t type, uint8_t combo){
+    uint16_t frequency = getFruitHitSound(type, combo);
+    if (frequency > 3000) freq = 3000;
+    buzzer_tone(&buzzer_cfg, frequency, 30);
     HAL_Delay(30);
     buzzer_off(&buzzer_cfg);
-    
 }
 
 static void playMissSound(void){
@@ -390,7 +387,7 @@ static void updateGame(float deltaSec){
             float awayy = dy/distance;
             float force = getFruitFleeForce(game.targets[i].type);
             game.targets[i].vel.x +=awayx*force* deltaSec;
-            game.targets[i].vel.y =awayy*force*deltaSec;
+            game.targets[i].vel.y +=awayy*force*deltaSec;
             float maxSpeed = baseSpeed * game.gameSpeed * 2.0f;
             float speed = sqrtf(game.targets[i].vel.x*game.targets[i].vel.x+game.targets[i].vel.y*game.targets[i].vel.y);
             if(speed>maxSpeed){
@@ -434,4 +431,51 @@ static void updateGame(float deltaSec){
 
 }
 
+static void drawGame(void){
+    LCD_Draw_Sprite((uint16_t)(game.crosshair.x-8),(uint16_t)(game.crosshair.y-8),16,16,(uint8_t)crosshairSprite);
+
+    //targets
+    for(int i = 0; i<game.targetCount;i++){
+        if(!game.targets[i].active)(
+            continue;
+        )
+        const uint8_t* sprite = getFruitSprite(game.targets[i].type);
+        if(game.targets[i].hitFlashEnd && HAL_GetTick() < game.targets[i].hitFlashEnd){
+            LCD_Draw_Sprite_Colour((uint16_t)(game.targets[i].pos.x-8),(uint16_t)(game.targets[i].pos.y - 8),16,16,sprite);
+        }
+    }
+    char buf[32];
+    sprint(buf,"Score: %d", game.score);
+    LCD_printString(buf,10,10,1,2);
+    sprintf(buf, "Lives: %d", game.lives);
+    LCD_printString(buf, 180, 10, 1, 2)
+    if(game.combo>1){
+        sprintf(buf, "x%d COMBO!", game.combo);
+        LCD_printString(buf, 80, 50, 2, 2);
+    }
+
+    // pause menu
+    if(game.state==statePaused){
+        LCD_Draw_Rect(30,50,180,140,0,1);
+        LCD_printString("PAUSED", 80, 60, 1, 3);
+        LCD_printString("Sensitivity:", 50, 100, 1, 2);
+        sprintf(buf, "%.2f", game.sensitivity);
+        LCD_printString(buf, 170, 100, 1, 2);
+        LCD_printString("<-  ->  adjust", 50, 130, 1, 2);
+        LCD_printString("Short press: resume", 40, 160, 1, 2);
+        LCD_printString("Long press: menu", 55, 180, 1, 2);
+        
+        
+    }
+    //game over
+    if(game.state==stateGameOver){
+        LCD_printString("GAME OVER", 70, 40, 2, 3);
+        sprintf(buf, "Score: %d", game.score);
+        LCD_printString(buf, 70, 90, 1, 2);
+        sprintf(buf, "High Score: %d", game.highScore);
+        LCD_printString(buf, 50, 120, 1, 2);
+        LCD_printString("Press button for menu", 30, 200, 1, 2);
+    }
+
+}
 
