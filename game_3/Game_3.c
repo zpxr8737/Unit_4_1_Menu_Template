@@ -43,17 +43,13 @@ stateGameOver
 } GameState;
 
 typedef struct{
-float x;
-float y;
-} Vector2D;
-
-typedef struct{
 Vector2D pos;
 Vector2D vel;
 uint8_t active;
 uint32_t hitFlashEnd;
 uint8_t type;
 uint8_t radius;
+uint32_t fleeStartTime;
 } Target_t;
 
 typedef struct{
@@ -61,6 +57,7 @@ GameState state;
 Target_t targets[maxTargets];
 uint8_t targetCount;
 Vector2D crosshair;
+Vector2D crosshairTarget;
 uint16_t score;
 uint8_t lives;
 uint8_t combo;
@@ -159,10 +156,10 @@ static TargetGameEngine_t game;
 
 static uint8_t getFruitRadius(uint8_t type){
     switch(type){
-        case fruitApple: return 8;
-        case fruitOrange: return 10;
-        case fruitWatermelon: return 14;
-        default: return 10;
+        case fruitApple: return 40;
+        case fruitOrange: return 50;
+        case fruitWatermelon: return 60;
+        default: return 50;
     }
 }
 
@@ -267,6 +264,7 @@ static void addTarget(void){
             game.targets[i].vel.x = cosf(angle)*speed;
             game.targets[i].vel.y=sinf(angle)*speed;
             game.targets[i].hitFlashEnd = 0;
+            game.targets[i].fleeStartTime = HAL_GetTick() + 800;  // Start fleeing after 0.8 sec
             break;
         }
     }
@@ -285,6 +283,8 @@ static void resetGame(void){
     game.sensitivity = 0.8f;
     game.crosshair.x = screenWidth/2;
     game.crosshair.y = screenHeight/2;
+    game.crosshairTarget.x = screenWidth/2;
+    game.crosshairTarget.y = screenHeight/2;
     game.ledFlashEnd=0;
     PWM_SetDuty(&pwm_cfg,0);
     for(int i =0; i< maxTargets;i++){
@@ -382,7 +382,7 @@ static void updateGame(float deltaSec){
         float dy = game.targets[i].pos.y - game.crosshair.y;
         float distance = sqrtf(dx*dx + dy*dy);
         float fleeDistance = (game.targets[i].type == fruitWatermelon) ? 70.0f: 50.0f;
-        if(distance<fleeDistance && distance > 0.1f){
+        if(distance<fleeDistance && distance > 0.1f && HAL_GetTick() >= game.targets[i].fleeStartTime){
             float awayx=dx/distance;
             float awayy = dy/distance;
             float force = getFruitFleeForce(game.targets[i].type);
@@ -452,7 +452,7 @@ static void drawGame(void){
     sprintf(buf,"Score: %d", game.score);
     LCD_printString(buf,10,10,1,2);
     sprintf(buf, "Lives: %d", game.lives);
-    LCD_printString(buf, 180, 10, 1, 2);
+    LCD_printString(buf, 140, 10, 1, 2);
     if(game.combo>1){
         sprintf(buf, "x%d COMBO!", game.combo);
         LCD_printString(buf, 80, 50, 2, 2);
@@ -464,7 +464,7 @@ static void drawGame(void){
         LCD_printString("PAUSED", 80, 60, 1, 3);
         LCD_printString("Sensitivity:", 50, 100, 1, 2);
         sprintf(buf, "%.2f", game.sensitivity);
-        LCD_printString(buf, 170, 100, 1, 2);
+        LCD_printString(buf, 140, 100, 1, 2);
         LCD_printString("<-  ->  adjust", 50, 130, 1, 2);
         LCD_printString("Short press: resume", 40, 160, 1, 2);
         LCD_printString("Long press: menu", 55, 180, 1, 2);
@@ -542,9 +542,14 @@ MenuState Game3_Run(void){
             }
         }
 
-        //updating crosshair
-        game.crosshair.x = (joyInput.coord.x * game.sensitivity) * (screenWidth/2)+(screenWidth/2);
-        game.crosshair.y = (joyInput.coord.y * game.sensitivity) * (screenHeight/2)+(screenHeight/2);
+        //updating crosshair target
+        game.crosshairTarget.x = (joystick_data.coord_mapped.x) * (screenWidth/2)+(screenWidth/2);
+        game.crosshairTarget.y = ((-joystick_data.coord_mapped.y)) * (screenHeight/2)+(screenHeight/2);
+        
+        //smooth crosshair movement with easing
+        float easeSpeed = 0.15f * game.sensitivity;  // sensitivity now controls speed, not range
+        game.crosshair.x += (game.crosshairTarget.x - game.crosshair.x) * easeSpeed;
+        game.crosshair.y += (game.crosshairTarget.y - game.crosshair.y) * easeSpeed;
         if(game.crosshair.x<0){
             game.crosshair.x=0;
         }
@@ -559,13 +564,13 @@ MenuState Game3_Run(void){
         }
 
         if(game.state==statePaused){
-            if(joyInput.direction == WEST){
+            if(joyInput.direction == W){
                 game.sensitivity -= 0.05f;
                 if(game.sensitivity <0){
                     game.sensitivity =0;
                 }
             }
-            if(joyInput.direction == EAST){
+            if(joyInput.direction == E){
                 game.sensitivity +=0.05f;
                 if(game.sensitivity>1){
                     game.sensitivity =1;
@@ -587,13 +592,5 @@ MenuState Game3_Run(void){
             if(frameTime<gameFrameMS){
                 HAL_Delay(gameFrameMS-frameTime);
             }
-            
-                
-        
-        
-        
-        
-            
     }
-}
 }
