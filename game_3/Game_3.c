@@ -486,10 +486,10 @@ static void drawGame(void){
         }
         const uint8_t* sprite = getFruitSprite(game.targets[i].type);
         if(game.targets[i].hitFlashEnd && HAL_GetTick() < game.targets[i].hitFlashEnd){
-            LCD_Draw_Sprite_Colour((uint16_t)(game.targets[i].pos.x-8),(uint16_t)(game.targets[i].pos.y - 8),16,16,sprite,1);
+            LCD_Draw_Sprite_Colour((uint16_t)(game.targets[i].pos.x-16),(uint16_t)(game.targets[i].pos.y - 16),32,32,sprite,1);
         }
         else{
-            LCD_Draw_Sprite((uint16_t)(game.targets[i].pos.x-8), (uint16_t)(game.targets[i].pos.y-8), 16, 16, sprite);
+            LCD_Draw_Sprite((uint16_t)(game.targets[i].pos.x-16), (uint16_t)(game.targets[i].pos.y-16), 32, 32, sprite);
         }
     }
 
@@ -505,25 +505,23 @@ static void drawGame(void){
 
     // pause menu
     if(game.state==statePaused){
-        LCD_Draw_Rect(30,50,180,140,0,1);
-        LCD_printString("PAUSED", 80, 60, 1, 3);
-        LCD_printString("Sensitivity:", 50, 100, 1, 2);
+        LCD_Draw_Rect(20,30,200,180,0,1);
+        LCD_printString("PAUSED", 75, 40, 1, 2);
+        LCD_printString("Sensitivity:", 35, 80, 1, 1);
         sprintf(buf, "%.2f", game.sensitivity);
-        LCD_printString(buf, 140, 100, 1, 2);
-        LCD_printString("<-  ->  adjust", 50, 130, 1, 2);
-        LCD_printString("Short press: resume", 40, 160, 1, 2);
-        LCD_printString("Long press: menu", 55, 180, 1, 2);
-        
-        
+        LCD_printString(buf, 150, 80, 1, 1);
+        LCD_printString("LEFT/RIGHT adjust", 35, 105, 1, 1);
+        LCD_printString("BTN3: resume", 35, 125, 1, 1);
+        LCD_printString("BTN2: menu", 35, 145, 1, 1);
     }
     //game over
     if(game.state==stateGameOver){
-        LCD_printString("GAME OVER", 70, 40, 2, 3);
+        LCD_printString("GAME OVER", 60, 30, 1, 2);
         sprintf(buf, "Score: %d", game.score);
-        LCD_printString(buf, 70, 90, 1, 2);
+        LCD_printString(buf, 70, 70, 1, 2);
         sprintf(buf, "High Score: %d", game.highScore);
-        LCD_printString(buf, 50, 120, 1, 2);
-        LCD_printString("Press button for menu", 30, 200, 1, 2);
+        LCD_printString(buf, 50, 100, 1, 1);
+        LCD_printString("BTN2: menu", 75, 150, 1, 2);
     }
 
 }
@@ -538,8 +536,6 @@ MenuState Game3_Run(void){
     buzzer_off(&buzzer_cfg);
 
     uint32_t lastFrameTime = HAL_GetTick();
-    uint32_t buttonPressStart = 0;
-    uint8_t buttonWasPressed = 0;
 
     while(1){
         uint32_t now= HAL_GetTick();
@@ -551,43 +547,37 @@ MenuState Game3_Run(void){
         Joystick_Read(&joystick_cfg, &joystick_data);
         UserInput joyInput = Joystick_GetInput(&joystick_data);
 
-        uint8_t buttonPressed = current_input.btn3_pressed;
-
-        if(buttonPressed && !buttonWasPressed){
-            buttonPressStart = now;
-            buttonWasPressed = 1;
-            
-        }
-        else if(!buttonPressed && buttonWasPressed){
-            uint32_t duration = now- buttonPressStart;
-            buttonWasPressed = 0;
-            if(duration < longPressMS){
-                if(game.state==statePlaying){
-                    handleShot(game.crosshair);
-                }
-                else if(game.state==statePaused){
-                    game.state=statePlaying;
-                }
-                else if(game.state==stateGameOver){
-                    PWM_SetDuty(&pwm_cfg, 0);
-                    buzzer_off(&buzzer_cfg);
-                    return MENU_STATE_HOME;
-                }
-                
+        // BTN2 pauses/resumes
+        if(current_input.btn2_pressed){
+            if(game.state==statePlaying){
+                game.state = statePaused;
             }
-            else{
-                if(game.state==statePlaying){
-                    game.state = statePaused;
-                }
-                else if(game.state==statePaused){
-                    PWM_SetDuty(&pwm_cfg, 0);
-                    buzzer_off(&buzzer_cfg);
-                    return MENU_STATE_HOME;
-                }
+            else if(game.state==statePaused){
+                game.state=statePlaying;
+            }
+            else if(game.state==stateGameOver){
+                PWM_SetDuty(&pwm_cfg, 0);
+                buzzer_off(&buzzer_cfg);
+                return MENU_STATE_HOME;
             }
         }
 
-        //updating crosshair target
+        // BTN3 (joystick button) shoots or resumes from pause
+        if(current_input.btn3_pressed){
+            if(game.state==statePlaying){
+                handleShot(game.crosshair);
+            }
+            else if(game.state==statePaused){
+                game.state=statePlaying;
+            }
+            else if(game.state==stateGameOver){
+                PWM_SetDuty(&pwm_cfg, 0);
+                buzzer_off(&buzzer_cfg);
+                return MENU_STATE_HOME;
+            }
+        }
+
+        // update crosshair
         game.crosshairTarget.x = (joystick_data.coord_mapped.x) * (screenWidth/2)+(screenWidth/2);
         game.crosshairTarget.y = ((-joystick_data.coord_mapped.y)) * (screenHeight/2)+(screenHeight/2);
         
@@ -621,8 +611,7 @@ MenuState Game3_Run(void){
                     game.sensitivity =1;
                 }
             }
-                
-            }
+        }
         
             if(game.state == statePlaying){
                 updateGame(deltaSec);
