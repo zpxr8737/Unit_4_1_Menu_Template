@@ -210,19 +210,19 @@ static uint8_t getFruitRadius(uint8_t type){
 
 static uint16_t getFruitScore(uint8_t type){
     switch(type){
-        case fruitApple: return 10;
+        case fruitApple: return 25;
         case fruitOrange: return 15;
-        case fruitWatermelon: return 25;
-        default: return 10;
+        case fruitWatermelon: return 10;
+        default: return 25;
     }
 }
 
 static float getFruitFleeForce(uint8_t type){
     switch(type){
-        case fruitApple: return 150.0f;
+        case fruitApple: return 250.0f;
         case fruitOrange: return 200.0f;
-        case fruitWatermelon: return 300.0f;
-        default: return 200.0f;
+        case fruitWatermelon: return 150.0f;
+        default: return 250.0f;
     }
     
 }
