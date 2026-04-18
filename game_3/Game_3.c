@@ -511,8 +511,8 @@ static void drawGame(void){
         sprintf(buf, "%.2f", game.sensitivity);
         LCD_printString(buf, 150, 80, 1, 1);
         LCD_printString("LEFT/RIGHT adjust", 35, 105, 1, 1);
-        LCD_printString("BTN3: resume", 35, 125, 1, 1);
-        LCD_printString("BTN2: menu", 35, 145, 1, 1);
+        LCD_printString("Joystick Press: resume", 35, 125, 1, 1);
+        LCD_printString("Button: menu", 35, 145, 1, 1);
     }
     //game over
     if(game.state==stateGameOver){
