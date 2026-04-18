@@ -521,7 +521,7 @@ static void drawGame(void){
         LCD_printString(buf, 70, 70, 1, 2);
         sprintf(buf, "High Score: %d", game.highScore);
         LCD_printString(buf, 50, 100, 1, 1);
-        LCD_printString("BTN2: menu", 75, 150, 1, 2);
+        LCD_printString("Button Press: menu", 75, 150, 1, 2);
     }
 
 }
@@ -547,7 +547,7 @@ MenuState Game3_Run(void){
         Joystick_Read(&joystick_cfg, &joystick_data);
         UserInput joyInput = Joystick_GetInput(&joystick_data);
 
-        // BTN2 pauses/resumes
+        // Button pauses/resumes
         if(current_input.btn2_pressed){
             if(game.state==statePlaying){
                 game.state = statePaused;
@@ -562,7 +562,7 @@ MenuState Game3_Run(void){
             }
         }
 
-        // BTN3 (joystick button) shoots or resumes from pause
+        // joystick button shoots or resumes from pause
         if(current_input.btn3_pressed){
             if(game.state==statePlaying){
                 handleShot(game.crosshair);
