@@ -32,20 +32,20 @@ static const uint16_t palette_vintage[16] = {
 
 static const uint16_t palette_custom[16] = {
     RGB565_ENDESGA_0,        
-    RGB565_ENDESGA_1,     
+    RGB565_ENDESGA_1,    
     RGB565_ENDESGA_2,  
     RGB565_ENDESGA_3,    
-    RGB565_ENDESGA_4,           
-    RGB565_ENDESGA_5,       
-    RGB565_ENDESGA_6,         
-    RGB565_ENDESGA_7,         
+    RGB565_ENDESGA_4,          
+    RGB565_ENDESGA_5,      
+    RGB565_ENDESGA_6,        
+    RGB565_ENDESGA_7,        
     RGB565_ENDESGA_8,        
-    RGB565_ENDESGA_9,         
+    RGB565_ENDESGA_9,        
     RGB565_ENDESGA_10,        
-    RGB565_ENDESGA_11,       
-    RGB565_ENDESGA_12,         
-    RGB565_ENDESGA_13,         
-    RGB565_ENDESGA_14,         
+    RGB565_ENDESGA_11,      
+    RGB565_ENDESGA_12,        
+    RGB565_ENDESGA_13,        
+    RGB565_ENDESGA_14,        
     RGB565_ENDESGA_15          
 };
 
