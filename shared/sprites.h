@@ -11,16 +11,18 @@ extern const uint8_t CAR_STRAIGHT[64][64];
 
 extern const uint8_t SKY[120][300];
 
-extern const uint8_t APPLE[16][16];
+extern const uint8_t appleSprite[16][16];
 
-extern const uint8_t ORANGE[16][16];
+extern const uint8_t orangeSprite[16][16];
 
-extern const uint8_t WATERMELON[16][16];
+extern const uint8_t watermelonSprite[16][16];
 
 extern const uint8_t LFS_SPLASHSCREEN[240][240];
 
 extern const uint8_t CAR_LEFT[64][64];
 
 extern const uint8_t CAR_RIGHT[64][64];
+
+extern const uint8_t crosshairSprite[16][16];
 
 #endif
