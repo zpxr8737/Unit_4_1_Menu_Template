@@ -23,4 +23,6 @@ extern const uint8_t CAR_LEFT[64][64];
 
 extern const uint8_t CAR_RIGHT[64][64];
 
+extern const uint8_t crosshairSprite[16][16];
+
 #endif

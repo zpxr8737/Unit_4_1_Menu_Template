@@ -1,4 +1,3 @@
-
 #include "Track.h"
 #include "LCD.h"
 #include <math.h>
@@ -117,7 +116,6 @@ void track_build(void) {
     add_straight(20);
     add_curve(10, 30, 10, 0.5f);
     add_straight(30);
-
 }
 
 
@@ -160,8 +158,7 @@ static void track_update_collision(float player_x) {
     // Check the segment immediately ahead
     int32_t check_seg = (player_seg + 1) % num_segs;
 
-    for (int32_t t = 0; t < num_fruits; t++)
-    {
+    for (int32_t t = 0; t < num_fruits; t++) {
         if (fruits[t].collected)          continue;   // already collected
         if (fruits[t].seg_idx != check_seg) continue; // not on this segment
 
@@ -170,8 +167,7 @@ static void track_update_collision(float player_x) {
         float dist = player_x - fruit_x;
 
         // Threshold within 0.3 to collect
-        if (abs(dist) < 0.30f)
-        {
+        if (abs(dist) < 0.30f) {
             fruits[t].collected = 1;
             fruits_collected++;
         }
