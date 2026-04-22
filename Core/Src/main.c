@@ -13,7 +13,7 @@
 // Controls:
 // - BT2/BT3 (Buttons): Available for game use
 // - Joystick UP/DOWN: Menu navigation and game input
-//
+// 
 // Architecture:
 // - MenuSystem: Runs its own loop, returns selected game
 // - Game modules: Each has Game_Run() with own loop, returns next state
@@ -187,6 +187,7 @@ int main(void)
     MX_USART2_UART_Init();
     MX_ADC1_Init();  // Initialize ADC for joystick
     MX_RNG_Init();   // Initialize RNG (if used by games)
+    srand(HAL_GetTick());  // Seed random number generator
     
     // Initialize LCD first (this sets up GPIOB pins)
     LCD_init(&cfg0);

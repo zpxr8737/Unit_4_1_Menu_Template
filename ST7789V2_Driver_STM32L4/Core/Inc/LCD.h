@@ -117,25 +117,7 @@ Written by Aeron Jarvis and James Avery
 #define RGB565_GREY_14  0x3CE7  // #e7e7e7
 #define RGB565_GREY_15  0xFFFF  // #ffffff
 
-// sky high palette
-#define RGB565_SKY_0   0x0000  // #000000
-#define RGB565_SKY_1   0xa052  // #555500
-#define RGB565_SKY_2   0xef7b  // #7f7f7f
-#define RGB565_SKY_3   0x00a8  // #aa0000
-#define RGB565_SKY_4   0x8091  // #953200
-#define RGB565_SKY_5   0x00f8  // #ff0000
-#define RGB565_SKY_6   0x2ebb  // #c16570
-#define RGB565_SKY_7   0xe007  // #00ff00
-#define RGB565_SKY_8   0x2d05  // #00a76b
-#define RGB565_SKY_9   0x40fd  // #ffaa00
-#define RGB565_SKY_10  0x1570  // #7400aa
-#define RGB565_SKY_11  0x1f00  // #0000ff
-#define RGB565_SKY_12  0x1f04  // #0080ff
-#define RGB565_SKY_13  0xff07  // #00ffff
-#define RGB565_SKY_14  0x50fd  // #ffaa80
-#define RGB565_SKY_15  0xffff  // #ffffff
-
-// endesga palette
+// Endesga palette - 16 colours
 #define RGB565_ENDESGA_0   0xc701  // #003a3d
 #define RGB565_ENDESGA_1   0x2641  // #422431
 #define RGB565_ENDESGA_2   0xe781  // #843d3a
@@ -152,6 +134,8 @@ Written by Aeron Jarvis and James Avery
 #define RGB565_ENDESGA_13  0x5e07  // #00ebf7
 #define RGB565_ENDESGA_14  0xfaad  // #aac0d4
 #define RGB565_ENDESGA_15  0xffff  // #ffffff
+
+
 
 // ========== Buffer Configuration ==========
 #define BUFFER_LENGTH ST7789V2_HEIGHT*ST7789V2_WIDTH/2  // 4 pixels per byte (2 bits per pixel)
